@@ -188,3 +188,34 @@ export const getWebsiteDetails = async (req, res) => {
       .json({ error: "An error occurred while fetching website details." });
   }
 };
+
+export const deleteWebsiteStatusHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Website ID is required." });
+    }
+
+    const website = await prisma.website.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!website) {
+      return res.status(404).json({ error: "Website not found." });
+    }
+
+    await prisma.websiteStatusHistory.deleteMany({
+      where: { site_id: parseInt(id) },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Status history deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting status history:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while deleting status history." });
+  }
+};
