@@ -147,7 +147,19 @@ export const checkWebsites = async (req, res) => {
       });
 
       if (status === "Fail") {
-        const failedTime = new Date().toISOString();
+        const formatDateTime = (date) => {
+          const options = {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          };
+          return new Intl.DateTimeFormat("en-GB", options).format(date);
+        };
+
+        const failedTime = formatDateTime(new Date());
         await sendFailureNotification(
           site.id,
           site.site_name,
