@@ -1,9 +1,38 @@
 import prisma from "../config/db.js";
 import axios from "axios";
 import https from "https";
-import { sendWebsiteFailureAlert } from "../index.js";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
+
+const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
+const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
+
+async function sendFailureNotification(siteName, siteUrl, time) {
+  try {
+    await axios.post(
+      "https://onesignal.com/api/v1/notifications",
+      {
+        app_id: ONESIGNAL_APP_ID,
+        headings: { en: "Website Down Alert" },
+        contents: {
+          en: `${siteName} (${siteUrl}) is down as of ${time}`,
+        },
+        included_segments: ["All"],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${ONESIGNAL_API_KEY}`,
+        },
+      }
+    );
+  } catch (err) {
+    console.error(
+      "OneSignal Notification Error:",
+      err.response?.data || err.message
+    );
+  }
+}
 
 export const getWebsites = async (req, res) => {
   try {
@@ -114,11 +143,8 @@ export const checkWebsites = async (req, res) => {
       });
 
       if (status === "Fail") {
-        sendWebsiteFailureAlert({
-          siteName: site.site_name,
-          siteUrl: site.url,
-          failedAt: new Date().toISOString(),
-        });
+        const failedTime = new Date().toLocaleString();
+        await sendFailureNotification(site.site_name, site.url, failedTime);
       }
     }
 
