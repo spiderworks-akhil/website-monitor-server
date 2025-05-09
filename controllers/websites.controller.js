@@ -115,7 +115,7 @@ export const checkWebsites = async (req, res) => {
 
       if (status === "Fail") {
         sendWebsiteFailureAlert({
-          siteName: site.name,
+          siteName: site.site_name,
           siteUrl: site.url,
           failedAt: new Date().toISOString(),
         });
