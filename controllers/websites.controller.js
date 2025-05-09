@@ -147,7 +147,7 @@ export const checkWebsites = async (req, res) => {
       });
 
       if (status === "Fail") {
-        const failedTime = new Date().toLocaleString();
+        const failedTime = new Date().toISOString();
         await sendFailureNotification(
           site.id,
           site.site_name,
