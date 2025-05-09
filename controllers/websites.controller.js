@@ -8,7 +8,7 @@ const agent = new https.Agent({ rejectUnauthorized: false });
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
 
-async function sendFailureNotification(siteId, siteName, siteUrl, time) {
+async function sendFailureNotification(siteId, siteName, siteUrl) {
   try {
     await axios.post(
       "https://onesignal.com/api/v1/notifications",
@@ -16,7 +16,7 @@ async function sendFailureNotification(siteId, siteName, siteUrl, time) {
         app_id: ONESIGNAL_APP_ID,
         headings: { en: "Website Down Alert" },
         contents: {
-          en: `${siteName} (${siteUrl}) is down as of ${time}`,
+          en: `${siteName} (${siteUrl}) is down.`,
         },
         included_segments: ["All"],
         data: {
@@ -147,25 +147,7 @@ export const checkWebsites = async (req, res) => {
       });
 
       if (status === "Fail") {
-        const formatDateTime = (date) => {
-          const options = {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          };
-          return new Intl.DateTimeFormat("en-GB", options).format(date);
-        };
-
-        const failedTime = formatDateTime(new Date());
-        await sendFailureNotification(
-          site.id,
-          site.site_name,
-          site.url,
-          failedTime
-        );
+        await sendFailureNotification(site.id, site.site_name, site.url);
 
         sendWebsiteFailureAlert({
           siteName: site.site_name,
