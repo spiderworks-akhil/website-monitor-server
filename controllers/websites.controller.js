@@ -1,6 +1,7 @@
 import prisma from "../config/db.js";
 import axios from "axios";
 import https from "https";
+import { sendWebsiteFailureAlert } from "../index.js";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
 
@@ -153,6 +154,12 @@ export const checkWebsites = async (req, res) => {
           site.url,
           failedTime
         );
+
+        sendWebsiteFailureAlert({
+          siteName: site.site_name,
+          siteUrl: site.url,
+          failedAt: new Date().toISOString(),
+        });
       }
     }
 
