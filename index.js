@@ -10,10 +10,39 @@ import {
   getCronFrequency,
   updateCronFrequency,
 } from "./cron/websiteCheck.cron.js";
+import { Server } from "socket.io";
+import http from "http";
 
 dotenv.config();
 
 const app = express();
+
+const server = http.createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin: "*",
+    credentials: true,
+  },
+});
+
+let connectedClients = [];
+
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+  connectedClients.push(socket);
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+    connectedClients = connectedClients.filter((s) => s.id !== socket.id);
+  });
+});
+
+export const sendWebsiteFailureAlert = (data) => {
+  connectedClients.forEach((socket) => {
+    socket.emit("website-failure", data);
+  });
+};
 
 app.use(
   cors({
@@ -60,4 +89,6 @@ app.use("/api/websites", websiteRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () =>
+  console.log(`Server + Socket.IO running on port ${PORT}`)
+);

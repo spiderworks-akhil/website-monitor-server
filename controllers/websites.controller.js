@@ -1,6 +1,7 @@
 import prisma from "../config/db.js";
 import axios from "axios";
 import https from "https";
+import { sendWebsiteFailureAlert } from "../index.js";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
 
@@ -111,6 +112,14 @@ export const checkWebsites = async (req, res) => {
         where: { id: site.id },
         data: { last_check_time: new Date() },
       });
+
+      if (status === "Fail") {
+        sendWebsiteFailureAlert({
+          siteName: site.name,
+          siteUrl: site.url,
+          failedAt: new Date().toISOString(),
+        });
+      }
     }
 
     return res.status(200).json({ message: "Manual website check completed." });
