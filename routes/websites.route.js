@@ -5,6 +5,7 @@ import {
   checkWebsites,
   getWebsiteDetails,
   deleteWebsiteStatusHistory,
+  deleteWebsite,
 } from "../controllers/websites.controller.js";
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.delete(
   "/website-details/:id/status-history",
   deleteWebsiteStatusHistory
 );
+router.delete("/website-delete/:id", deleteWebsite);
 
 export default router;
