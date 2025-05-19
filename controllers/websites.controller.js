@@ -115,7 +115,7 @@ export const createWebsite = async (req, res) => {
       return res.status(400).json({ error: "URL is required." });
     }
 
-    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/i;
+    const urlPattern = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w\-./?%&=]*)?$/i;
     if (!urlPattern.test(url)) {
       return res.status(400).json({ error: "Invalid URL format." });
     }
