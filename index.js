@@ -55,6 +55,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://website-monitor-client.vercel.app",
+      "https://monitor.spiderworks.org",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
