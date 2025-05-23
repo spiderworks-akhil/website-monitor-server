@@ -1,9 +1,9 @@
-name: Auto Deploy Laravel
+name: Auto Deploy Node.js App
 
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main  # or your production branch
 
 jobs:
   deploy:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
+      - name: Deploy to Server and Run Prisma Migrations
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -22,6 +22,20 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            echo "🔁 Switching to project directory"
             cd /home/backend
+
+            echo "🔐 Git safe directory setup"
             git config --global --add safe.directory /home/backend
-            ./deploy.sh
+
+            echo "📥 Pulling latest code"
+            git pull origin main
+
+            echo "📦 Installing dependencies"
+            npm install
+
+            echo "🛠️ Running Prisma migrations"
+            npx prisma migrate deploy
+
+            echo "🚀 Restarting server (replace with your actual PM2/Node restart command)"
+            pm2 restart all
