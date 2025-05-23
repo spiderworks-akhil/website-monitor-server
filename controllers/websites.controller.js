@@ -42,7 +42,7 @@ export const getWebsites = async (req, res) => {
   try {
     const { name, startDate, endDate, includeToday } = req.query;
 
-    const userId = req.user.id;
+    const userId = +req.user.id;
 
     let where = { userId };
 
