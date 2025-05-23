@@ -7,13 +7,21 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserType {
+  BASIC
+  PREMIUM
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
+  user_type UserType @default(BASIC)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Website Website[]
 }
 
 model Website {
@@ -23,6 +31,9 @@ model Website {
   last_check_time DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 
   statusHistory WebsiteStatusHistory[]
 }

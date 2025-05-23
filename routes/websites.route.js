@@ -7,11 +7,12 @@ import {
   deleteWebsiteStatusHistory,
   deleteWebsite,
 } from "../controllers/websites.controller.js";
+import { authenticateUser } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/get-websites", getWebsites);
-router.post("/add-website", createWebsite);
+router.get("/get-websites", authenticateUser, getWebsites);
+router.post("/add-website", authenticateUser, createWebsite);
 router.get("/check-websites", checkWebsites);
 router.get("/website-details/:id", getWebsiteDetails);
 router.delete(

@@ -42,7 +42,10 @@ export const getWebsites = async (req, res) => {
   try {
     const { name, startDate, endDate, includeToday } = req.query;
 
-    let where = {};
+    const userId = req.user.id;
+
+    let where = { userId };
+
     if (name) {
       where.site_name = { contains: name, mode: "insensitive" };
     }
@@ -101,6 +104,8 @@ export const createWebsite = async (req, res) => {
   try {
     const { site_name, url } = req.body;
 
+    const userId = req.user.id;
+
     if (!site_name && !url) {
       return res
         .status(400)
@@ -115,13 +120,29 @@ export const createWebsite = async (req, res) => {
       return res.status(400).json({ error: "URL is required." });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { Website: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    if (user.user_type === "BASIC" && user.Website.length >= 10) {
+      return res.status(403).json({
+        error:
+          "Basic users can only add up to 10 websites. Upgrade to Premium for more.",
+      });
+    }
+
     const urlPattern = /^(https?:\/\/)([\w-]+\.)+[\w-]+(\/[\w\-./?%&=]*)?$/i;
     if (!urlPattern.test(url)) {
       return res.status(400).json({ error: "Invalid URL format." });
     }
 
     const website = await prisma.website.create({
-      data: { site_name, url },
+      data: { site_name, url, userId },
     });
 
     return res.status(201).json(website);
