@@ -1,9 +1,9 @@
-name: Auto Deploy Node.js App
+name: Auto Deploy Laravel
 
 on:
   push:
     branches:
-      - main  # your deployment branch
+      - main  # or your deployment branch
 
 jobs:
   deploy:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server and Run Prisma Migrations
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -22,20 +22,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            echo "🔁 Switching to project directory"
             cd /home/backend
-
-            echo "🔐 Git safe directory setup"
             git config --global --add safe.directory /home/backend
-
-            echo "📥 Pulling latest code"
-            git pull origin main
-
-            echo "📦 Installing dependencies"
-            npm install
-
-            echo "🛠️ Running Prisma migrations with .env"
-            npx -y dotenv -e .env -- npx prisma migrate deploy
-
-            echo "🚀 Restarting backend server"
-            pm2 restart web-monitor-server
+            ./deploy.sh
