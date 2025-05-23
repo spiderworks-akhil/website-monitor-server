@@ -1,41 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum UserType {
-  BASIC
-  PREMIUM
-}
-
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  user_type UserType @default(BASIC)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Website Website[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user_type UserType  @default(BASIC)
+  Website   Website[]
 }
 
 model Website {
-  id              Int       @id @default(autoincrement())
+  id              Int                    @id @default(autoincrement())
   site_name       String
-  url             String    @unique
+  url             String                 @unique
   last_check_time DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  statusHistory WebsiteStatusHistory[]
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  userId          Int
+  user            User                   @relation(fields: [userId], references: [id])
+  statusHistory   WebsiteStatusHistory[]
 }
 
 model WebsiteStatusHistory {
@@ -43,8 +35,7 @@ model WebsiteStatusHistory {
   site_id    Int
   status     String
   check_time DateTime @default(now())
-
-  website Website @relation(fields: [site_id], references: [id])
+  website    Website  @relation(fields: [site_id], references: [id])
 }
 
 model CronFrequency {
@@ -54,6 +45,12 @@ model CronFrequency {
 }
 
 model dummy {
-  id        Int      @id @default(autoincrement())
-  name      String?
+  id   Int     @id @default(autoincrement())
+  name String?
+  description String?
+}
+
+enum UserType {
+  BASIC
+  PREMIUM
 }
