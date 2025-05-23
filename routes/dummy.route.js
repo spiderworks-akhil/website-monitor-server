@@ -5,6 +5,6 @@ import { getAllDummies } from "../controllers/dummy.js";
 const router = express.Router();
 
 router.get("/get", getAllDummies);
-router.get("/post", createDummy);
+router.post("/post", createDummy);
 
 export default router;
