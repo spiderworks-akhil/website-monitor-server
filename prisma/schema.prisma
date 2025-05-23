@@ -48,6 +48,7 @@ model dummy {
   id   Int     @id @default(autoincrement())
   name String?
   description String?
+  test String?
 }
 
 enum UserType {
