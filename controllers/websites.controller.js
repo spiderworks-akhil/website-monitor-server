@@ -96,7 +96,7 @@ export const getWebsites = async (req, res) => {
     console.error("Error fetching websites:", error);
     return res
       .status(500)
-      .json({ error: "An error occurred while fetching websites." });
+      .json({ error: `An error occurred while fetching websites.${error.message || error}` });
   }
 };
 
