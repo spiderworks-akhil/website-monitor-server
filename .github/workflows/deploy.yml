@@ -22,8 +22,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            echo "🔁 Switching to project directory"
-            cd /home/backend
+            echo "🔁 Switching to backend project directory"
+            cd /home/backend/web-monitor-server
 
             echo "🔐 Git safe directory setup"
             git config --global --add safe.directory /home/backend
@@ -34,8 +34,8 @@ jobs:
             echo "📦 Installing dependencies"
             npm install
 
-            echo "🛠️ Running Prisma migrations"
-            npx prisma migrate deploy
+            echo "🛠️ Running Prisma migrations with .env"
+            npx -y dotenv -e .env -- npx prisma migrate deploy
 
-            echo "🚀 Restarting server (replace with your actual PM2/Node restart command)"
-            pm2 restart all
+            echo "🚀 Restarting backend server"
+            pm2 restart web-monitor-server
