@@ -52,3 +52,8 @@ model CronFrequency {
   frequency Int      @default(1)
   updatedAt DateTime @updatedAt
 }
+
+model dummy {
+  id        Int      @id @default(autoincrement())
+  name      String?
+}
