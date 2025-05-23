@@ -3,7 +3,7 @@ name: Auto Deploy Node.js App
 on:
   push:
     branches:
-      - main  # or your production branch
+      - main  # your deployment branch
 
 jobs:
   deploy:
@@ -22,8 +22,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            echo "🔁 Switching to backend project directory"
-            cd /home/backend/web-monitor-server
+            echo "🔁 Switching to project directory"
+            cd /home/backend
 
             echo "🔐 Git safe directory setup"
             git config --global --add safe.directory /home/backend
