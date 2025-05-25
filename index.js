@@ -4,9 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.route.js";
 import meRoutes from "./routes/auth.me.route.js";
-import userRoutes from "./routes/user.route.js";
 import websiteRoutes from "./routes/websites.route.js";
-import dummyRoutes from "./routes/dummy.route.js";
 import {
   getCronFrequency,
   updateCronFrequency,
@@ -92,9 +90,7 @@ app.post("/api/cron/update-frequency", async (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/current-user", meRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/websites", websiteRoutes);
-app.use("/api/dummy", dummyRoutes);
 
 const PORT = process.env.PORT || 5000;
 

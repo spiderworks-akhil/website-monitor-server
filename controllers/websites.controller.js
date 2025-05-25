@@ -42,7 +42,7 @@ export const getWebsites = async (req, res) => {
   try {
     const { name, startDate, endDate, includeToday } = req.query;
 
-    const userId = +req.user.id;
+    const userId = req.user.id;
 
     let where = { userId };
 
@@ -94,9 +94,11 @@ export const getWebsites = async (req, res) => {
     return res.status(200).json(websites);
   } catch (error) {
     console.error("Error fetching websites:", error);
-    return res
-      .status(500)
-      .json({ error: `An error occurred while fetching websites.${error.message || error}` });
+    return res.status(500).json({
+      error: `An error occurred while fetching websites.${
+        error.message || error
+      }`,
+    });
   }
 };
 
