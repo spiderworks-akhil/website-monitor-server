@@ -21,7 +21,7 @@ model User {
 model Website {
   id              Int                    @id @default(autoincrement())
   site_name       String
-  url             String                 @unique
+  url             String
   last_check_time DateTime?
   createdAt       DateTime               @default(now())
   updatedAt       DateTime               @updatedAt

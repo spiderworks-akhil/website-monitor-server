@@ -131,6 +131,19 @@ export const createWebsite = async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
+    const existingWebsite = await prisma.website.findFirst({
+      where: {
+        userId,
+        site_name: site_name,
+      },
+    });
+
+    if (existingWebsite) {
+      return res
+        .status(400)
+        .json({ error: "You already have a website with this name." });
+    }
+
     if (user.user_type === "BASIC" && user.Website.length >= 10) {
       return res.status(403).json({
         error:

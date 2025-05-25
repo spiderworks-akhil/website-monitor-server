@@ -1,31 +1,19 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import prisma from "../config/db.js";
 
-const getUserFromToken = (req) => {
-  const token = req.cookies.token;
-  if (!token) return null;
-
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    return null;
-  }
-};
-
 export const getMe = async (req, res) => {
-  const decoded = getUserFromToken(req);
-  if (!decoded) {
+  if (!req.user || !req.user.id) {
     return res.status(401).json({ user: null });
   }
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: req.user.id },
       select: {
         id: true,
         name: true,
         email: true,
+        user_type: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -43,16 +31,16 @@ export const getMe = async (req, res) => {
 };
 
 export const updateMe = async (req, res) => {
-  const decoded = getUserFromToken(req);
-  if (!decoded) {
+  if (!req.user || !req.user.id) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { email, name, password } = req.body;
+  const { email, name, password, user_type } = req.body;
 
   const updateData = {};
   if (email) updateData.email = email;
   if (name) updateData.name = name;
+  if (user_type) updateData.user_type = user_type;
   if (password) {
     const salt = await bcrypt.genSalt(10);
     updateData.password = await bcrypt.hash(password, salt);
@@ -60,12 +48,13 @@ export const updateMe = async (req, res) => {
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { id: decoded.id },
+      where: { id: req.user.id },
       data: updateData,
       select: {
         id: true,
         name: true,
         email: true,
+        user_type: true,
         createdAt: true,
         updatedAt: true,
       },
