@@ -6,11 +6,13 @@ import authRoutes from "./routes/auth.route.js";
 import meRoutes from "./routes/auth.me.route.js";
 import websiteRoutes from "./routes/websites.route.js";
 import {
-  getCronFrequency,
-  updateCronFrequency,
+  getUserCronFrequency,
+  updateUserCronFrequency,
+  initializeAllUserCronJobs,
 } from "./cron/websiteCheck.cron.js";
 import http from "http";
 import { Server } from "socket.io";
+import { authenticateUser } from "./middlewares/authMiddleware.js";
 
 dotenv.config();
 
@@ -67,24 +69,33 @@ app.use(cookieParser());
 
 // cron routes
 
-app.get("/api/cron/frequency", async (req, res) => {
+app.get("/api/cron/user-frequency", authenticateUser, async (req, res) => {
+  const userId = req.user.id;
   try {
-    const frequency = await getCronFrequency();
+    const frequency = await getUserCronFrequency(userId);
     res.status(200).json({ frequency });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch frequency" });
   }
 });
 
-app.post("/api/cron/update-frequency", async (req, res) => {
-  const { frequency } = req.body;
-  try {
-    await updateCronFrequency(frequency);
-    res.status(200).json({ message: "Frequency updated successfully" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+app.post(
+  "/api/cron/update-user-frequency",
+  authenticateUser,
+  async (req, res) => {
+    const { frequency } = req.body;
+    const userId = req.user.id;
+
+    try {
+      await updateUserCronFrequency(userId, frequency);
+      res.status(200).json({ message: "Frequency updated successfully" });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
   }
-});
+);
+
+initializeAllUserCronJobs();
 
 // other routes
 

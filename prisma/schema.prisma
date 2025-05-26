@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user_type UserType  @default(BASIC)
-  Website   Website[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user_type     UserType       @default(BASIC)
+  Website       Website[]
+  CronFrequency CronFrequency?
 }
 
 model Website {
@@ -39,9 +40,12 @@ model WebsiteStatusHistory {
 }
 
 model CronFrequency {
-  id        Int      @id @default(1)
-  frequency Int      @default(1)
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  frequency Int      @default(5)
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum UserType {
