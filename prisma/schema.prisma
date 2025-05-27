@@ -44,16 +44,15 @@ model WebsiteFailureNotification {
   siteName  String
   siteUrl   String
   createdAt DateTime @default(now())
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model CronFrequency {
   id        Int      @id @default(autoincrement())
-  userId    Int
   frequency Int      @default(5)
   updatedAt DateTime @updatedAt
+  userId    Int
 }
 
 enum UserType {
