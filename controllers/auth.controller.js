@@ -30,6 +30,13 @@ export const signup = async (req, res) => {
       },
     });
 
+    await prisma.cronFrequency.create({
+      data: {
+        userId: newUser.id,
+        frequency: 5,
+      },
+    });
+
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Signup Error:", error);
