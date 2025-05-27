@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
 import https from "https";
 import { sendWebsiteFailureAlert } from "../index.js";
+import axios from "axios";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
 
