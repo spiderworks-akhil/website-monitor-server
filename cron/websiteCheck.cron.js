@@ -1,16 +1,15 @@
 import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
 import https from "https";
-import { sendWebsiteFailureAlert } from "../index.js";
 import axios from "axios";
+import { sendWebsiteFailureAlert } from "../index.js";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
+const prisma = new PrismaClient();
+const userCronJobs = new Map();
 
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
-
-const prisma = new PrismaClient();
-const userCronJobs = new Map();
 
 async function sendFailureNotification(siteId, siteName, siteUrl) {
   try {
@@ -23,9 +22,7 @@ async function sendFailureNotification(siteId, siteName, siteUrl) {
           en: `${siteName} (${siteUrl}) is down.`,
         },
         included_segments: ["All"],
-        data: {
-          site_id: siteId,
-        },
+        data: { site_id: siteId },
       },
       {
         headers: {
@@ -76,6 +73,8 @@ export const initializeAllUserCronJobs = async () => {
   for (const freq of latestFrequencies.values()) {
     startUserCronJob(freq.userId, freq.frequency);
   }
+
+  console.log("All user cron jobs initialized");
 };
 
 export const updateUserCronFrequency = async (userId, frequency) => {
@@ -83,11 +82,24 @@ export const updateUserCronFrequency = async (userId, frequency) => {
     throw new Error("Invalid frequency. Must be 1, 5, 10, 15, or 30 minutes.");
   }
 
-  await prisma.cronFrequency.create({
-    data: { userId, frequency },
+  const existing = await prisma.cronFrequency.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
   });
 
+  if (existing) {
+    await prisma.cronFrequency.update({
+      where: { id: existing.id },
+      data: { frequency },
+    });
+  } else {
+    await prisma.cronFrequency.create({
+      data: { userId, frequency },
+    });
+  }
+
   startUserCronJob(userId, frequency);
+  console.log(`Cron frequency updated for user ${userId} to ${frequency} mins`);
 };
 
 export const getUserCronFrequency = async (userId) => {
