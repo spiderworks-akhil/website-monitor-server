@@ -60,7 +60,7 @@ export const initializeAllUserCronJobs = async () => {
   const frequencies = await prisma.cronFrequency.findMany();
 
   const latestFrequencies = new Map();
-  for (const freq of frequencies) { 
+  for (const freq of frequencies) {
     if (
       !latestFrequencies.has(freq.userId) ||
       new Date(freq.updatedAt) >
