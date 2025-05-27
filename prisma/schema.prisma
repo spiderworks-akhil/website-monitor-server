@@ -45,7 +45,6 @@ model CronFrequency {
   userId    Int      @unique
   frequency Int      @default(5)
   updatedAt DateTime @updatedAt
-  status    String?
 
   user User @relation(fields: [userId], references: [id])
 }
