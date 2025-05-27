@@ -90,5 +90,15 @@ export const checkWebsitesForUser = async (userId) => {
       where: { id: site.id },
       data: { last_check_time: new Date() },
     });
+
+    if (status === "Fail") {
+      await prisma.websiteFailureNotification.create({
+        data: {
+          siteName: site.site_name,
+          siteUrl: site.url,
+          userId: site.userId,
+        },
+      });
+    }
   }
 };

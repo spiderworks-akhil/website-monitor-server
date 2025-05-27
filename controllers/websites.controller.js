@@ -171,7 +171,9 @@ export const createWebsite = async (req, res) => {
 
 export const checkWebsites = async (req, res) => {
   try {
-    const websites = await prisma.website.findMany();
+    const userId = req.user.id;
+
+    const websites = await prisma.website.findMany({ where: { userId } });
 
     for (const site of websites) {
       let status = "Fail";
@@ -198,12 +200,12 @@ export const checkWebsites = async (req, res) => {
       });
 
       if (status === "Fail") {
-        await sendFailureNotification(site.id, site.site_name, site.url);
-
-        sendWebsiteFailureAlert({
-          siteName: site.site_name,
-          siteUrl: site.url,
-          failedAt: new Date().toISOString(),
+        await prisma.websiteFailureNotification.create({
+          data: {
+            siteName: site.site_name,
+            siteUrl: site.url,
+            userId: site.userId,
+          },
         });
       }
     }
@@ -214,6 +216,38 @@ export const checkWebsites = async (req, res) => {
     return res
       .status(500)
       .json({ error: "An error occurred while checking websites." });
+  }
+};
+
+export const getTodayFailureNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const notifications = await prisma.websiteFailureNotification.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return res.status(200).json(notifications);
+  } catch (error) {
+    console.error("Error fetching today’s failure notifications:", error);
+    return res
+      .status(500)
+      .json({ error: "Error fetching today's notifications." });
   }
 };
 
