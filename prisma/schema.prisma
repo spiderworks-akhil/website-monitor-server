@@ -45,11 +45,6 @@ model CronFrequency {
   updatedAt DateTime @updatedAt
 }
 
-model Dummy {
-  id   Int    @id @default(autoincrement())
-  name String
-}
-
 enum UserType {
   BASIC
   PREMIUM
