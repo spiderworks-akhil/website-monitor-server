@@ -49,6 +49,11 @@ model CronFrequency {
   user User @relation(fields: [userId], references: [id])
 }
 
+model Dummy {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
 enum UserType {
   BASIC
   PREMIUM
