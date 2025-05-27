@@ -204,7 +204,7 @@ export const checkWebsites = async (req, res) => {
           data: {
             siteName: site.site_name,
             siteUrl: site.url,
-            userId: site.userId,
+            userId: userId,
           },
         });
 
