@@ -1,11 +1,45 @@
 import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
 import https from "https";
+import { sendWebsiteFailureAlert } from "../index.js";
 
 const agent = new https.Agent({ rejectUnauthorized: false });
 
+const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
+const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
+
 const prisma = new PrismaClient();
 const userCronJobs = new Map();
+
+async function sendFailureNotification(siteId, siteName, siteUrl) {
+  try {
+    await axios.post(
+      "https://onesignal.com/api/v1/notifications",
+      {
+        app_id: ONESIGNAL_APP_ID,
+        headings: { en: "Website Down Alert" },
+        contents: {
+          en: `${siteName} (${siteUrl}) is down.`,
+        },
+        included_segments: ["All"],
+        data: {
+          site_id: siteId,
+        },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${ONESIGNAL_API_KEY}`,
+        },
+      }
+    );
+  } catch (err) {
+    console.error(
+      "OneSignal Notification Error:",
+      err.response?.data || err.message
+    );
+  }
+}
 
 export const startUserCronJob = (userId, frequency) => {
   if (userCronJobs.has(userId)) {
@@ -98,6 +132,14 @@ export const checkWebsitesForUser = async (userId) => {
           siteUrl: site.url,
           userId: site.userId,
         },
+      });
+
+      await sendFailureNotification(site.id, site.site_name, site.url);
+
+      sendWebsiteFailureAlert({
+        siteName: site.site_name,
+        siteUrl: site.url,
+        failedAt: new Date().toISOString(),
       });
     }
   }

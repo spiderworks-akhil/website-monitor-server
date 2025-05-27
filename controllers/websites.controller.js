@@ -207,6 +207,14 @@ export const checkWebsites = async (req, res) => {
             userId: site.userId,
           },
         });
+
+        await sendFailureNotification(site.id, site.site_name, site.url);
+
+        sendWebsiteFailureAlert({
+          siteName: site.site_name,
+          siteUrl: site.url,
+          failedAt: new Date().toISOString(),
+        });
       }
     }
 
