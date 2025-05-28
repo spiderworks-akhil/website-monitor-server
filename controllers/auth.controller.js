@@ -29,13 +29,16 @@ export const signup = async (req, res) => {
         user_type: "BASIC",
       },
     });
-
-    await prisma.cronFrequency.create({
-      data: {
-        userId: newUser.id,
-        frequency: 5,
-      },
-    });
+    
+    console.log(newUser);
+    if (newUser) {
+      await prisma.cronFrequency.create({
+        data: {
+          userId: newUser.id,
+          frequency: 5,
+        },
+      });
+    }
 
     return res
       .status(201)
