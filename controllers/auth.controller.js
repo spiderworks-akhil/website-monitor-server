@@ -29,20 +29,15 @@ export const signup = async (req, res) => {
         user_type: "BASIC",
       },
     });
-    
-    console.log(newUser);
-    if (newUser) {
-      await prisma.cronFrequency.create({
-        data: {
-          userId: newUser.id,
-          frequency: 5,
-        },
-      });
-    }
 
-    return res
-      .status(201)
-      .json({ message: "User created successfully", userId: newUser.id });
+    await prisma.cronFrequency.create({
+      data: {
+        userId: newUser.id,
+        frequency: 5,
+      },
+    });
+
+    return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Signup Error:", error);
     return res.status(500).json({ message: "Server error" });

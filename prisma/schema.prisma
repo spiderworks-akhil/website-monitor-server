@@ -53,7 +53,6 @@ model CronFrequency {
   id        Int      @id @default(autoincrement())
   frequency Int      @default(5)
   updatedAt DateTime @updatedAt
-  status    String?
   userId    Int      @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
