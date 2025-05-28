@@ -1,10 +1,10 @@
 import cron from "node-cron";
 import { PrismaClient } from "@prisma/client";
-import https from "https";
 import axios from "axios";
 import { sendWebsiteFailureAlert } from "../index.js";
+import { http } from "http";
 
-const agent = new https.Agent({ rejectUnauthorized: false });
+const agent = new http.Agent({ rejectUnauthorized: false });
 const prisma = new PrismaClient();
 const userCronJobs = new Map();
 
