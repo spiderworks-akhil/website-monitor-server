@@ -1,7 +1,7 @@
 import prisma from "../config/db.js";
 import axios from "axios";
 import { sendWebsiteFailureAlert } from "../index.js";
-import { http } from 'http';
+import http from "http";
 
 const agent = new http.Agent({ rejectUnauthorized: false });
 
