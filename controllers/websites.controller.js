@@ -1,9 +1,9 @@
 import prisma from "../config/db.js";
 import axios from "axios";
 import { sendWebsiteFailureAlert } from "../index.js";
-import http from "http";
+import https from "https";
 
-const agent = new http.Agent({ rejectUnauthorized: false });
+const agent = new https.Agent({ rejectUnauthorized: true });
 
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;

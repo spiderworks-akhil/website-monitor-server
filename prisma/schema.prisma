@@ -17,6 +17,7 @@ model User {
   user_type                  UserType                     @default(BASIC)
   Website                    Website[]
   WebsiteFailureNotification WebsiteFailureNotification[]
+  CronFrequency              CronFrequency?
 }
 
 model Website {
@@ -52,7 +53,8 @@ model CronFrequency {
   id        Int      @id @default(autoincrement())
   frequency Int      @default(5)
   updatedAt DateTime @updatedAt
-  userId    Int?
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum UserType {
