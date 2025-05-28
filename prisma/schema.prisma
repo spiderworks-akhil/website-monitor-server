@@ -55,11 +55,6 @@ model CronFrequency {
   userId    Int?
 }
 
-model dummy {
-  id   Int    @id @default(autoincrement())
-  name String
-}
-
 enum UserType {
   BASIC
   PREMIUM
