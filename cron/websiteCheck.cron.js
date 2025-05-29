@@ -11,7 +11,7 @@ const userCronJobs = new Map();
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
 
-async function sendFailureNotification(siteId, siteName, siteUrl) {
+async function sendFailureNotification(siteId, siteName, siteUrl, playerId) {
   try {
     await axios.post(
       "https://onesignal.com/api/v1/notifications",
@@ -21,7 +21,7 @@ async function sendFailureNotification(siteId, siteName, siteUrl) {
         contents: {
           en: `${siteName} (${siteUrl}) is down.`,
         },
-        included_segments: ["All"],
+        include_player_ids: [playerId],
         data: { site_id: siteId },
       },
       {
@@ -114,6 +114,11 @@ export const getUserCronFrequency = async (userId) => {
 export const checkWebsitesForUser = async (userId) => {
   const websites = await prisma.website.findMany({ where: { userId } });
 
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { playerId: true },
+  });
+
   for (const site of websites) {
     let status = "Fail";
 
@@ -147,7 +152,12 @@ export const checkWebsitesForUser = async (userId) => {
         },
       });
 
-      await sendFailureNotification(site.id, site.site_name, site.url);
+      await sendFailureNotification(
+        site.id,
+        site.site_name,
+        site.url,
+        user?.playerId
+      );
 
       sendWebsiteFailureAlert({
         siteName: site.site_name,
