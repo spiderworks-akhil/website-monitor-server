@@ -1,45 +1,37 @@
 import nodemailer from "nodemailer";
 
-// Gmail SMTP transporter (App Password required, not real password)
 export const transporter = nodemailer.createTransport({
-  service: "gmail", // Use the Gmail service instead of raw smtp config
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // App Password generated from your Google account
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Failure alert email
 export const sendFailureEmail = async (to, siteName, siteUrl) => {
-  const fromName = "Website Monitor";
-  const fromEmail = process.env.EMAIL_USER;
-
   const mailOptions = {
-    from: `"${fromName}" <${fromEmail}>`, // Well-formatted sender
+    from: `"Website Monitor" <${process.env.EMAIL_USER}>`,
     to,
     subject: `🚨 Website Down Alert: ${siteName}`,
-    text: `${siteName} is currently down. Please check it: ${siteUrl}`,
+    text: `${siteName} is down. Check it here: ${siteUrl}`,
     html: `
-      <div style="font-family: Arial, sans-serif; color: #333;">
+      <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
         <h2 style="color: #d9534f;">🚨 Website Down Alert</h2>
         <p><strong>${siteName}</strong> is currently not reachable:</p>
-        <p><a href="${siteUrl}" style="color: #0275d8;">${siteUrl}</a></p>
-        <p><strong>Checked at:</strong> ${new Date().toLocaleString()}</p>
+        <p><a href="${siteUrl}" target="_blank" rel="noopener noreferrer">${siteUrl}</a></p>
+        <p>Checked at: ${new Date().toLocaleString()}</p>
         <hr />
-        <p style="font-size: 12px; color: #888;">This is an automated alert from Website Monitor.</p>
+        <p style="font-size: 12px; color: #888;">This is an automated alert from Website Monitor. Please do not reply.</p>
       </div>
     `,
-    headers: {
-      "X-Priority": "1 (Highest)",
-      "X-MSMail-Priority": "High",
-      Importance: "High",
-    },
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("Alert email sent to:", to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: %s", info.messageId);
   } catch (err) {
-    console.error("Email send error:", err);
+    console.error("Email send failed:", err);
   }
 };
