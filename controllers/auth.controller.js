@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, playerId } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -21,13 +21,19 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const userData = {
+      name,
+      email,
+      password: hashedPassword,
+      user_type: "BASIC",
+    };
+
+    if (playerId) {
+      userData.playerId = playerId;
+    }
+
     const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        user_type: "BASIC",
-      },
+      data: userData,
     });
 
     await prisma.cronFrequency.create({
@@ -46,7 +52,7 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, playerId } = req.body;
 
     if (!email || !password) {
       return res
@@ -63,6 +69,22 @@ export const signin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (playerId && (!user.playerId || user.playerId !== playerId)) {
+      const existingPlayerId = await prisma.user.findFirst({
+        where: {
+          playerId,
+          id: { not: user.id },
+        },
+      });
+
+      if (!existingPlayerId) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { playerId },
+        });
+      }
     }
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
