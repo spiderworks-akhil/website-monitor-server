@@ -8,7 +8,7 @@ const agent = new https.Agent({ rejectUnauthorized: true });
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
 
-async function sendFailureNotification(siteId, siteName, siteUrl) {
+async function sendFailureNotification(playerId, siteId, siteName, siteUrl) {
   try {
     await axios.post(
       "https://onesignal.com/api/v1/notifications",
@@ -18,7 +18,7 @@ async function sendFailureNotification(siteId, siteName, siteUrl) {
         contents: {
           en: `${siteName} (${siteUrl}) is down.`,
         },
-        included_segments: ["All"],
+        included_segments: [playerId],
         data: {
           site_id: siteId,
         },
@@ -208,7 +208,15 @@ export const checkWebsites = async (req, res) => {
           },
         });
 
-        await sendFailureNotification(site.id, site.site_name, site.url);
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user?.playerId) {
+          await sendFailureNotification(
+            user.playerId,
+            site.id,
+            site.site_name,
+            site.url
+          );
+        }
 
         sendWebsiteFailureAlert({
           siteName: site.site_name,
