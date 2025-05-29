@@ -15,6 +15,7 @@ model User {
   createdAt                  DateTime                     @default(now())
   updatedAt                  DateTime                     @updatedAt
   user_type                  UserType                     @default(BASIC)
+  playerId                   String?
   Website                    Website[]
   WebsiteFailureNotification WebsiteFailureNotification[]
   CronFrequency              CronFrequency?
