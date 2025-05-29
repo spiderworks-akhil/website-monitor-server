@@ -18,7 +18,7 @@ async function sendFailureNotification(siteId, siteName, siteUrl, playerId) {
         contents: {
           en: `${siteName} (${siteUrl}) is down.`,
         },
-        included_segments: [playerId],
+        include_player_ids: [playerId],
         data: {
           site_id: siteId,
         },
