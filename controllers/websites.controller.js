@@ -2,6 +2,7 @@ import prisma from "../config/db.js";
 import axios from "axios";
 import { sendWebsiteFailureAlert } from "../index.js";
 import https from "https";
+import { sendFailureEmail } from "../utils/mailer.js";
 
 const agent = new https.Agent({ rejectUnauthorized: true });
 
@@ -210,7 +211,7 @@ export const checkWebsites = async (req, res) => {
 
         const user = await prisma.user.findUnique({
           where: { id: userId },
-          select: { playerId: true },
+          select: { playerId: true, email: true },
         });
 
         await sendFailureNotification(
@@ -225,6 +226,10 @@ export const checkWebsites = async (req, res) => {
           siteUrl: site.url,
           failedAt: new Date().toISOString(),
         });
+
+        if (user.email) {
+          await sendFailureEmail(user.email, site.site_name, site.url);
+        }
       }
     }
 
