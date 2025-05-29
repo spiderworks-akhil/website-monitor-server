@@ -269,6 +269,24 @@ export const getTodayFailureNotifications = async (req, res) => {
   }
 };
 
+export const clearAllFailureNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const deleted = await prisma.websiteFailureNotification.deleteMany({
+      where: { userId },
+    });
+
+    return res.status(200).json({
+      message: "All notifications cleared.",
+      deletedCount: deleted.count,
+    });
+  } catch (error) {
+    console.error("Error clearing notifications:", error);
+    return res.status(500).json({ error: "Failed to clear notifications." });
+  }
+};
+
 export const getWebsiteDetails = async (req, res) => {
   try {
     const { id } = req.params;

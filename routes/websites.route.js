@@ -7,6 +7,7 @@ import {
   deleteWebsiteStatusHistory,
   deleteWebsite,
   getTodayFailureNotifications,
+  clearAllFailureNotifications,
 } from "../controllers/websites.controller.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 
@@ -25,6 +26,11 @@ router.get(
   "/notifications/today",
   authenticateUser,
   getTodayFailureNotifications
+);
+router.delete(
+  "/notifications/clear",
+  authenticateUser,
+  clearAllFailureNotifications
 );
 
 export default router;
