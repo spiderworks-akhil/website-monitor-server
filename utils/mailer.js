@@ -16,9 +16,13 @@ export const sendFailureEmail = async (to, siteName, siteUrl) => {
     to,
     subject: `Website Down Alert: ${siteName}`,
     html: `
-      <h3>🚨 Website Down Alert</h3>
-      <p>The website <strong>${siteName}</strong> (<a href="${siteUrl}">${siteUrl}</a>) is currently <span style="color:red">not reachable</span>.</p>
-      <p>Please check it immediately.</p>
+      <div style="font-family: sans-serif; line-height: 1.5;">
+        <h2>Website Down Alert</h2>
+        <p>The website <strong>${siteName}</strong> is currently not reachable:</p>
+        <p><a href="${siteUrl}">${siteUrl}</a></p>
+        <p>Please check it as soon as possible.</p>
+        <hr />
+      </div>
     `,
   };
 
