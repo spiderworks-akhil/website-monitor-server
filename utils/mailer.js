@@ -12,16 +12,18 @@ export const transporter = nodemailer.createTransport({
 
 export const sendFailureEmail = async (to, siteName, siteUrl) => {
   const mailOptions = {
-    from: `"Website Monitor" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER,
     to,
-    subject: `Website Down Alert: ${siteName}`,
+    subject: `🚨 Website Down Alert: ${siteName}`,
+    text: `${siteName} is down. Check: ${siteUrl}`,
     html: `
       <div style="font-family: sans-serif; line-height: 1.5;">
-        <h2>Website Down Alert</h2>
-        <p>The website <strong>${siteName}</strong> is currently not reachable:</p>
+        <h2 style="color: #d9534f;">🚨 Website Down Alert</h2>
+        <p><strong>${siteName}</strong> is not reachable at:</p>
         <p><a href="${siteUrl}">${siteUrl}</a></p>
-        <p>Please check it as soon as possible.</p>
+        <p>Checked at: ${new Date().toLocaleString()}</p>
         <hr />
+        <p style="font-size: 12px; color: #888;">This is an automated alert from Website Monitor.</p>
       </div>
     `,
   };
