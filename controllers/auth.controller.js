@@ -155,7 +155,7 @@ export const changePassword = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { id, name, email, phone } = req.body;
+    let { id, name, email, phone, playerId } = req.body;
 
     if (!id || !name || !email) {
       return res
@@ -163,25 +163,56 @@ export const createUser = async (req, res) => {
         .json({ message: "ID, name, and email are required" });
     }
 
+    id = parseInt(id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "ID must be a valid integer" });
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { id },
     });
 
     if (existingUser) {
+      if (
+        playerId &&
+        (!existingUser.playerId || existingUser.playerId !== playerId)
+      ) {
+        const existingPlayerId = await prisma.user.findFirst({
+          where: {
+            playerId,
+            id: { not: existingUser.id },
+          },
+        });
+
+        if (!existingPlayerId) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { playerId },
+          });
+        }
+      }
+
       return res.status(200).json({
         success: true,
       });
     }
 
+    const userData = {
+      id,
+      name,
+      email,
+    };
+
+    if (phone) {
+      userData.phone = phone;
+    }
+
+    if (playerId) {
+      userData.playerId = playerId;
+    }
+
     const newUser = await prisma.user.create({
-      data: {
-        id,
-        name,
-        email,
-        phone,
-        password: "",
-        user_type: "BASIC",
-      },
+      data: userData,
     });
 
     await prisma.cronFrequency.create({
@@ -197,6 +228,36 @@ export const createUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Create User Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        user_type: true,
+        playerId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Get Current User Error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
