@@ -8,10 +8,10 @@ datasource db {
 }
 
 model User {
-  id                         Int                          @id @default(autoincrement())
+  id                         Int                          @id
   name                       String
   email                      String                       @unique
-  password                   String
+  phone                      String?
   createdAt                  DateTime                     @default(now())
   updatedAt                  DateTime                     @updatedAt
   user_type                  UserType                     @default(BASIC)
@@ -19,6 +19,7 @@ model User {
   Website                    Website[]
   WebsiteFailureNotification WebsiteFailureNotification[]
   CronFrequency              CronFrequency?
+  role                       UserRole                     @default(Standard)
 }
 
 model Website {
@@ -61,4 +62,10 @@ model CronFrequency {
 enum UserType {
   BASIC
   PREMIUM
+}
+
+enum UserRole {
+  Standard
+  Manager
+  Admin
 }

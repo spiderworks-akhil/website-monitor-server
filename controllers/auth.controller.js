@@ -121,3 +121,82 @@ export const logout = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!id || !password) {
+      return res
+        .status(400)
+        .json({ message: "User ID and new password are required" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await prisma.user.update({
+      where: { id: parseInt(id) },
+      data: { password: hashedPassword },
+    });
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const createUser = async (req, res) => {
+  try {
+    const { id, name, email, phone } = req.body;
+
+    if (!id || !name || !email) {
+      return res
+        .status(400)
+        .json({ message: "ID, name, and email are required" });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (existingUser) {
+      return res.status(200).json({
+        success: true,
+      });
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        id,
+        name,
+        email,
+        phone,
+        password: "",
+        user_type: "BASIC",
+      },
+    });
+
+    await prisma.cronFrequency.create({
+      data: {
+        userId: newUser.id,
+        frequency: 5,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully",
+    });
+  } catch (error) {
+    console.error("Create User Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
